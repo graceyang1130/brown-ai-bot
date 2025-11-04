@@ -437,7 +437,7 @@ if __name__ == "__main__":
         template_bot.skip_previously_forecasted_questions = False
         forecast_reports = asyncio.run(
             template_bot.forecast_on_tournament(
-                MetaculusApi.CURRENT_METACULUS_CUP_ID, return_exceptions=True
+                "metaculus-cup-fall-2025", return_exceptions=True
             )
         )
     elif run_mode == "test_questions":
