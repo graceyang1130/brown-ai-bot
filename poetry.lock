@@ -815,8 +815,8 @@ optional = false
 python-versions = "<4.0,>=3.11"
 groups = ["main"]
 files = [
-    {file = "forecasting_tools-0.2.54-py3-none-any.whl", hash = "sha256:9b628dcb844d7dcf9bbf04a428ebe5ec9cc71c452cb12d26834c51969114319e"},
-    {file = "forecasting_tools-0.2.54.tar.gz", hash = "sha256:3449ca8c6b61ea03501d73029ac2155edf714cfe5e987691e48a7baa077f4deb"},
+    {file = "forecasting_tools-0.2.76-py3-none-any.whl", hash = "sha256:1dce214fc768cbc4ff135f808f46eee74ca267d5ac23c066a5d9e09826ee5ad2"},
+    {file = "forecasting_tools-0.2.76.tar.gz", hash = "sha256:a4f0cf97df2b860a89903c97b7bd5e1d73ffd9d6b5deb0f2319ec03cbb1a0a7c"},
 ]
 
 [package.dependencies]
