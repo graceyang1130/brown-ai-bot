@@ -392,7 +392,7 @@ if __name__ == "__main__":
         help="Specify the run mode (default: tournament)",
     )
     args = parser.parse_args()
-    run_mode: Literal["tournament", "metaculus_cup", "test_questions"] = args.mode
+    run_mode: Literal["tournament", "tournament_all", "metaculus_cup", "test_questions"] = args.mode
     assert run_mode in [
         "tournament",
         "metaculus_cup",
@@ -420,6 +420,20 @@ if __name__ == "__main__":
     )
 
     if run_mode == "tournament":
+        template_bot.skip_previously_forecasted_questions = True
+        seasonal_tournament_reports = asyncio.run(
+            template_bot.forecast_on_tournament(
+                MetaculusApi.CURRENT_AI_COMPETITION_ID, return_exceptions=True
+            )
+        )
+        minibench_reports = asyncio.run(
+            template_bot.forecast_on_tournament(
+                MetaculusApi.CURRENT_MINIBENCH_ID, return_exceptions=True
+            )
+        )
+        forecast_reports = seasonal_tournament_reports + minibench_reports
+    elif run_mode =="tournament_all":
+        template_bot.skip_previously_forecasted_questions = False
         seasonal_tournament_reports = asyncio.run(
             template_bot.forecast_on_tournament(
                 MetaculusApi.CURRENT_AI_COMPETITION_ID, return_exceptions=True
