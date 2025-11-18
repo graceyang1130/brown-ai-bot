@@ -809,7 +809,7 @@ typing = ["typing-extensions (>=4.12.2) ; python_version < \"3.11\""]
 
 [[package]]
 name = "forecasting-tools"
-version = "0.2.54"
+version = "0.2.76"
 description = "AI forecasting and research tools to help humans reason about and forecast the future"
 optional = false
 python-versions = "<4.0,>=3.11"
