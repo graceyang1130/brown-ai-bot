@@ -1,4 +1,4 @@
-name: Forecast on Whole Tournament (WARNING - 400+ questions, run with caution)
+name: Forecast on Whole Minibench (WARNING - 60 questions, run with caution)
 
 on:
   workflow_dispatch:
@@ -30,7 +30,7 @@ jobs:
         run: poetry install --no-interaction --no-root
       - name: Run bot
         run: |
-          poetry run python main.py --mode tournament_all
+          poetry run python main.py --mode minibench_all
         # this reads the environment variables from the github repository.
         # Store under Settings --> Secrets and variables --> Actions
         env:
