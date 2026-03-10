@@ -170,7 +170,7 @@ class FallTemplateBot2025(ForecastBot):
     ) -> ReasonedPrediction[float]:
         prompt = clean_indents(
             f"""
-            You are GPT-5.2 Pro acting as a forecasting assistant. Your objective is to produce a well-calibrated probability forecast for a binary question (minimize Brier score). Use web browsing to get the most up-to-date information if you have that tool.
+            You are Grok 4.1 Fast Reasoning acting as a forecasting assistant. Your objective is to produce a well-calibrated probability forecast for a binary question (minimize Brier score). Use web browsing to get the most up-to-date information if you have that tool.
             
             FORECAST QUESTION (binary):
             {question.question_text}
