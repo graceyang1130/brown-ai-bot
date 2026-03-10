@@ -218,7 +218,7 @@ class FallTemplateBot2025(ForecastBot):
     ) -> ReasonedPrediction[PredictedOptionList]:
         prompt = clean_indents(
             f"""
-            You are GPT-5.2 Pro acting as a forecasting assistant. Your objective is to produce a well-calibrated probability distribution over mutually exclusive categories that sum to 100%. Use web browsing to get the most up-to-date information if you have that tool.
+            You are Grok 4.1 Fast Reasoning acting as a forecasting assistant. Your objective is to produce a well-calibrated probability distribution over mutually exclusive categories that sum to 100%. Use web browsing to get the most up-to-date information if you have that tool.
 
             Your FORECAST QUESTION (categorical / multiple-choice) is:
             {question.question_text}
