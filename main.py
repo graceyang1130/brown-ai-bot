@@ -246,7 +246,7 @@ class FallTemplateBot2025(ForecastBot):
         )
         return ReasonedPrediction(prediction_value=decimal_pred, reasoning=reasoning)
 
-       async def _run_forecast_on_multiple_choice(
+    async def _run_forecast_on_multiple_choice(
         self, question: MultipleChoiceQuestion, research: str
     ) -> ReasonedPrediction[PredictedOptionList]:
         prompt = clean_indents(
