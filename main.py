@@ -281,54 +281,87 @@ class FallTemplateBot2025(ForecastBot):
         upper_bound_message, lower_bound_message = (
             self._create_upper_and_lower_bound_messages(question)
         )
+        x_threshold = question.nominal_lower_bound if question.nominal_lower_bound is not None else question.lower_bound
+        y_threshold = question.nominal_upper_bound if question.nominal_upper_bound is not None else question.upper_bound
         prompt = clean_indents(
             f"""
-            You are a professional forecaster interviewing for a job.
+            You are Grok 4.1 Fast Reasoning acting as a probabilistic forecaster. Your objective is to produce a coherent probability distribution for a numeric quantity, including tail probabilities and quartiles. Use web browsing to get the most up-to-date information if you have that tool.
 
-            Your interview question is:
+            FORECAST QUESTION (quantity):
             {question.question_text}
 
-            Background:
+            QUANTITY DEFINITION (units, geography, population, measurement, and any transformations):
             {question.background_info}
+            Units: {question.unit_of_measure if question.unit_of_measure else "Not stated (please infer this)"}
 
+            RESOLUTION CRITERIA (how it will be judged, key dates, data sources, edge cases):
             {question.resolution_criteria}
 
             {question.fine_print}
 
-            Units for answer: {question.unit_of_measure if question.unit_of_measure else "Not stated (please infer this)"}
+            THRESHOLDS:
+            X = {x_threshold}  (need P(value < X))
+            Y = {y_threshold}  (need P(value > Y))
 
-            Your research assistant says:
-            {research}
+            OPTIONAL CONTEXT / ATTACHMENTS:
+            {research if research else "None"}
 
-            Today is {datetime.now().strftime("%Y-%m-%d")}.
+            FORECASTING RULES (follow in order):
+            1) Restate the quantity, unit, timeframe, and the resolution rule as a checklist. State any assumptions.
+            2) Outside view / base distribution:
+               - Identify historical/analog distributions or prior ranges for similar quantities.
+               - If available, cite empirical sources; otherwise build a reasoned prior range.
+            3) Choose a distribution family (or mixture) consistent with the support:
+               - If strictly nonnegative → consider lognormal/gamma or truncated distributions.
+               - If bounded → consider beta (after scaling) or truncated families.
+               - If plausibly multi-regime (e.g., policy-dependent) → consider a mixture with explicit scenario weights.
+            4) Web research (if available):
+               - Search for the most recent datapoints, trend drivers, and credible projections.
+               - Prefer primary data and reputable analyses; cross-check.
+            5) Build an initial distribution:
+               - Provide p25, p50, p75.
+               - Provide P(value < X) and P(value > Y).
+               - Describe shape (skewness, tails, modality). If bimodal/trimodal, describe modes and weights.
+            6) Coherence checks (must pass):
+               - p25 ≤ p50 ≤ p75
+               - Tail probabilities are consistent with quartiles (e.g., if X < p25 then P(value < X) should usually be < 25%, etc.).
+               - Probabilities are within [0,100].
+            7) Step-back calibration:
+               - Name the governing abstraction/principle (e.g., mean reversion, capacity constraints, diffusion, institutional incentives).
+               - Check for anchoring on a single forecast source or recent datapoint; adjust if needed.
+            8) Finalize and present results.
 
-            {lower_bound_message}
-            {upper_bound_message}
+            OUTPUT FORMAT (strict):
+            Return TWO sections:
 
-            Formatting Instructions:
-            - Please notice the units requested (e.g. whether you represent a number as 1,000,000 or 1 million).
-            - Never use scientific notation.
-            - Always start with a smaller number (more negative if negative) and then increase from there
+            A) JSON (valid JSON only)
+            {{
+              "question": "...",
+              "as_of_date": "YYYY-MM-DD",
+              "quantity": {{"name": "...", "unit": "...", "support_notes": "..."}},
+              "resolution_checklist": ["..."],
+              "assumptions_if_any": ["..."],
+              "distribution_summary": {{
+                "percentiles": {{"p25": V25, "p50": V50, "p75": V75}},
+                "tail_probabilities_pct": {{"p_lt_X": PLTX, "X": X, "p_gt_Y": PGTY, "Y": Y}},
+                "shape": {{
+                  "modality": "unimodal|bimodal|trimodal",
+                  "skew": "left|right|roughly_symmetric",
+                  "tail_heaviness": "light|medium|heavy",
+                  "mixture_components_if_any": [
+                    {{"weight_pct": W, "description": "mode/region + rough location/scale + scenario story"}}
+                  ],
+                  "notes": "..."
+                }}
+              }},
+              "key_drivers": ["..."],
+              "key_uncertainties": ["..."],
+              "sources": [
+                {{"name": "...", "date": "YYYY-MM-DD or null", "what_it_supports": "..."}}
+              ]
+            }}
 
-            Before answering you write:
-            (a) The time left until the outcome to the question is known.
-            (b) The outcome if nothing changed.
-            (c) The outcome if the current trend continued.
-            (d) The expectations of experts and markets.
-            (e) A brief description of an unexpected scenario that results in a low outcome.
-            (f) A brief description of an unexpected scenario that results in a high outcome.
-
-            You remind yourself that good forecasters are humble and set wide 90/10 confidence intervals to account for unknown unknowns.
-
-            The last thing you write is your final answer as:
-            "
-            Percentile 10: XX
-            Percentile 20: XX
-            Percentile 40: XX
-            Percentile 60: XX
-            Percentile 80: XX
-            Percentile 90: XX
-            "
+            B) Brief rationale (max 10 bullets), including: why this distribution family/mixture is appropriate and what would shift mass to different regions.
             """
         )
         reasoning = await self.get_llm("default", "llm").invoke(prompt)
